@@ -133,8 +133,6 @@ public class FeatureUninstallMojo extends AbstractMojo {
 
         addArguments(launcher,uninstallUIs);
 
-
-
         int result = launcher.execute(forkedProcessTimeoutInSeconds);
         if (result != 0) {
             throw new MojoFailureException("P2 publisher return code was " + result);
@@ -144,15 +142,27 @@ public class FeatureUninstallMojo extends AbstractMojo {
 
     private void addArguments(P2ApplicationLauncher launcher, String uninstallUIs) throws IOException {
         launcher.addArguments(
+                // a comma separated list of metadata repository URLs where the software to be installed can be found
                 "-metadataRepository", metadataRepository.toExternalForm(),
+                // a comma separated list of artifact repository URLs where the software artifacts can be found
                 "-artifactRepository", artifactRepository.toExternalForm(),
-                "-profileProperties", "org.eclipse.update.install.features=true",
+                // a comma separated list of <key>=<value> pair.
+                // The property org.eclipse.update.install.features=true will cause the update manager features to be
+                // installed
+                "-profileProperties", "org.eclipse.update.install.features=false",
+                // a comma separated list of IUs to uninstall. Each entry in the list is in the form
+                // <id> [ '/' <version> ]
                 "-uninstallIU", uninstallUIs,
-                "-bundlepool", destination,
+                // the location of where the plug-ins and features will be stored. This value is only taken into account
+                // when a new profile is created. For an application where all the bundles are located into the
+                // plugins/ folder of the destination, set it to <destination>
+                //"-bundlepool", destination,
+                // use a shared location for the install. The path defaults to ${user.home}/.p2
                 "-shared" , destination + File.separator + "p2",
+                //the path of a folder in which the targeted product is located
                 "-destination", destination + File.separator + profile,
-                "-profile", profile.toString(),
-                "-roaming"
+                // the profile id containing the description of the targeted product
+                "-profile", profile.toString()
         );
     }
 
